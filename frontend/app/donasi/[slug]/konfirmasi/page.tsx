@@ -1,0 +1,148 @@
+"use client";
+
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { donationCampaigns } from "../../data";
+import { slugify } from "@/app/utils/slugify";
+import { useState, useEffect } from "react";
+import { use } from "react";
+
+export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, "0");
+    const s = Math.floor(sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const campaign = donationCampaigns.find(
+    (item) => slugify(item.title) === slug
+  );
+
+  if (!campaign) {
+    return <div className="p-20 text-center">Campaign tidak ditemukan 😢</div>;
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
+
+      <Link
+        href={`/donasi/${slug}`}
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary"
+      >
+        <ChevronLeft size={18} /> Kembali ke Campaign
+      </Link>
+
+      {/* Title */}
+      <h1 className="text-center text-2xl font-bold">Konfirmasi Donasi</h1>
+      <p className="text-center text-gray-600 text-sm">
+        Silakan periksa kembali detail donasi kamu sebelum melanjutkan ke pembayaran
+      </p>
+
+      {/* Countdown */}
+      <div className="text-center py-3 bg-orange-100 border border-orange-300 rounded-lg text-orange-700 font-medium">
+        Selesaikan pembayaran dalam{" "}
+        <span className="font-bold">{formatTime(timeLeft)}</span>
+      </div>
+
+      {/* === CARD DETAIL === */}
+      <div className="bg-white border rounded-xl shadow-sm p-6 space-y-5">
+
+        {/* Header campaign */}
+        <div className="bg-primary rounded-lg p-4 text-white">
+          <p className="font-semibold text-sm">{campaign.title}</p>
+          <p className="text-xs opacity-90">Yayasan Peduli Anak Indonesia</p>
+          <p className="text-xs mt-1">
+            1.324 donatur • {campaign.progress}% tercapai
+          </p>
+        </div>
+
+        {/* Info donor + donasi */}
+        <div className="grid grid-cols-2 gap-6 text-sm">
+          <div>
+            <p className="text-gray-500">Nama Donatur</p>
+            <p className="font-medium">Hamba Allah</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Nominal Donasi</p>
+            <p className="font-semibold text-primary">Rp 250.000</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Tanggal Donasi</p>
+            <p className="font-medium">19 Oktober 2024</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Metode Pembayaran</p>
+            <p className="font-medium">QRIS</p>
+          </div>
+        </div>
+
+        {/* QRIS */}
+        <div className="bg-gray-50 border rounded-lg p-6 text-center">
+          <p className="text-sm font-medium mb-3">Scan QR Code untuk Pembayaran</p>
+
+          <img src="/assets/qrcode.png" className="mx-auto w-40 h-40" />
+
+          <p className="text-xs text-gray-600 mt-3">
+            Scan menggunakan aplikasi mobile banking atau e-wallet
+          </p>
+        </div>
+
+        {/* Total */}
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <p>Nominal Donasi</p>
+            <p>Rp 250.000</p>
+          </div>
+          <div className="flex justify-between">
+            <p>Biaya Admin</p>
+            <p className="text-green-600">Gratis</p>
+          </div>
+          <div className="flex justify-between font-bold pt-2 border-t">
+            <p>Total Pembayaran</p>
+            <p className="text-primary">Rp 250.000</p>
+          </div>
+        </div>
+      </div>
+
+      {/* BUTTONS */}
+      <div className="flex gap-4">
+        <Link
+          href={`/donasi/${slug}/berhasil`}
+          className="flex-1 bg-primary/80 text-white py-2 rounded-lg font-medium text-center hover:bg-primary transition"
+        >
+          Bayar Sekarang
+        </Link>
+
+        <Link
+          href={`/donasi/${slug}`}
+          className="flex-1 border border-primary text-primary py-2 rounded-lg font-medium text-center hover:bg-primary/10 transition"
+        >
+          Edit Data
+        </Link>
+      </div>
+
+
+      {/* Footer info */}
+      <div className="bg-purple-50 text-center text-xs text-gray-600 p-4 rounded-lg border border-primary/20">
+        <p className="font-semibold text-primary mb-1">💜 Jaminan Transparansi</p>
+        <p>
+          Dana yang masuk akan disalurkan sesuai tujuan campaign. Kamu akan mendapatkan laporan
+          penyaluran di halaman campaign.
+        </p>
+      </div>
+
+    </div>
+  );
+}

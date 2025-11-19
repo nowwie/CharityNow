@@ -1,0 +1,68 @@
+import { DonationCampaignProps } from "./component/donationcard";
+
+export const donationCampaigns: DonationCampaignProps[] = [
+  {
+    title: "Nutrisi Sehat untuk 1000 Anak di Desa Terpencil",
+    category: "Gizi Anak & Balita",
+    daysLeft: 73,
+    collectedAmount: "Rp 45.200.000",
+    progress: 68,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Paket Sembako Bulanan untuk Keluarga Prasejahtera",
+    category: "Paket Sembako",
+    daysLeft: 45,
+    collectedAmount: "Rp 32.500.000",
+    progress: 82,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Bantuan Pangan Darurat Korban Bencana Alam",
+    category: "Pangan Darurat",
+    daysLeft: 12,
+    collectedAmount: "Rp 142.800.000",
+    progress: 95,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Makanan Siap Saji untuk Pekerja Harian",
+    category: "Makanan Siap Saji",
+    daysLeft: 28,
+    collectedAmount: "Rp 27.100.000",
+    progress: 54,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Program Gizi Balita Stunting di Wilayah Timur",
+    category: "Gizi Anak & Balita",
+    daysLeft: 91,
+    collectedAmount: "Rp 19.200.000",
+    progress: 38,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Sembako Ramadan untuk Yatim Piatu",
+    category: "Paket Sembako",
+    daysLeft: 156,
+    collectedAmount: "Rp 76.400.000",
+    progress: 76,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Dapur Umum untuk Lansia dan Difabel",
+    category: "Makanan Siap Saji",
+    daysLeft: 67,
+    collectedAmount: "Rp 53.600.000",
+    progress: 89,
+    image: "/assets/campaign.jpg",
+  },
+  {
+    title: "Logistik Pangan Daerah Terisolir Banjir",
+    category: "Pangan Darurat",
+    daysLeft: 8,
+    collectedAmount: "Rp 31.200.000",
+    progress: 62,
+    image: "/assets/campaign.jpg",
+  },
+];
