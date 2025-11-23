@@ -9,7 +9,6 @@ export default function AdminDashboard() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 LOAD DATA DARI BACKEND
   useEffect(() => {
     async function loadCampaigns() {
       try {
@@ -25,6 +24,31 @@ export default function AdminDashboard() {
 
     loadCampaigns();
   }, []);
+
+  async function handleDelete(id: number) {
+  if (!confirm("Yakin ingin menghapus campaign ini?")) return;
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`http://127.0.0.1:8000/api/campaigns/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("Campaign berhasil dihapus");
+
+    // refresh halaman
+    window.location.reload();
+  } else {
+    alert(data.message || "Gagal menghapus campaign");
+  }
+}
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -82,6 +106,7 @@ export default function AdminDashboard() {
                 campaigns.map((c) => (
                   <CampaignRow
                     key={c.id}
+                    id={c.id}
                     image={`http://127.0.0.1:8000/storage/${c.image}`}
                     title={c.title}
                     subtitle={`Kategori: ${c.category}`}
@@ -94,6 +119,7 @@ export default function AdminDashboard() {
                       ) || 0
                     }
                     status={c.status}
+                    onDelete={() => handleDelete(c.id)}
                   />
                 ))
               )}
@@ -110,6 +136,7 @@ export default function AdminDashboard() {
 /* ===== COMPONENTS ===== */
 
 function CampaignRow({
+  id,
   image,
   title,
   subtitle,
@@ -118,6 +145,7 @@ function CampaignRow({
   collected,
   progress,
   status,
+  onDelete,
 }: any) {
   return (
     <tr className="border-b">
@@ -171,7 +199,7 @@ function CampaignRow({
       <td className="py-4 px-4 flex gap-3">
         <button className="text-blue-600 text-lg">👁</button>
         <button className="text-yellow-500 text-lg">✏️</button>
-        <button className="text-red-500 text-lg">🗑</button>
+        <button className="text-red-500 text-lg" onClick={() =>onDelete(id)}>🗑</button>
       </td>
     </tr>
   );
