@@ -18,20 +18,29 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->prepend(\App\Http\Middleware\CorsMiddleware::class);
+
+        // 🔥 CORS BENAR → hanya ini
+        $middleware->use([
+            \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\CorsMiddleware::class,
+        ]);
+
+        // alias lain
         $middleware->alias([
             'auth.api' => \App\Http\Middleware\ApiAuthenticate::class,
         ]);
-        $middleware->redirectGuestsTo(fn () => null);
+
+        $middleware->redirectGuestsTo(fn() => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'message' => 'Unauthenticated.'
-            ], 401);
-        }
-        
-        return redirect()->guest(route('login'));
-    });
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Unauthenticated.'
+                ], 401);
+            }
+
+            return redirect()->guest(route('login'));
+        });
     })->create();
+    

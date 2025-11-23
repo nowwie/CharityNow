@@ -1,10 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Header from "@/app/component/headeradmin";
 import Footer from "@/app/component/footer";
 import Image from "next/image";
 
 export default function AdminDashboard() {
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 LOAD DATA DARI BACKEND
+  useEffect(() => {
+    async function loadCampaigns() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/campaigns");
+        const json = await res.json();
+        setCampaigns(json.data || []);
+      } catch (err) {
+        console.error("Gagal load campaign:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCampaigns();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -20,17 +41,12 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        {/* Statistik */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
-          <StatCard title="Campaign Aktif" value="24" icon="🟢" />
-          <StatCard title="Campaign Selesai" value="156" icon="☑️" />
-          <StatCard title="Total Donasi" value="Rp 2.4M" icon="💰" />
-          <StatCard title="Total Donatur" value="8,432" icon="👥" />
-        </div>
-
         {/* Tombol Tambah */}
         <div className="mt-8">
-          <button className="bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition">
+          <button
+            onClick={() => (window.location.href = "/admin/campaign/add")}
+            className="bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition"
+          >
             + Tambah Campaign Baru
           </button>
         </div>
@@ -50,52 +66,39 @@ export default function AdminDashboard() {
             </thead>
 
             <tbody className="text-sm">
-              {/* Row 1 */}
-              <CampaignRow
-                image="/img/campaign1.jpg"
-                title="Bantuan Gizi Anak Maluku"
-                subtitle="Dibuat 2 hari lalu"
-                category="Gizi Anak & Balita"
-                target="Rp 50,000,000"
-                collected="Rp 32,500,000"
-                progress={65}
-                status="Aktif"
-              />
-
-              {/* Row 2 */}
-              <CampaignRow
-                image="/img/campaign2.jpg"
-                title="Sembako untuk Keluarga Prasejahtera"
-                subtitle="Dibuat 5 hari lalu"
-                category="Paket Sembako"
-                target="Rp 25,000,000"
-                collected="Rp 25,000,000"
-                progress={100}
-                status="Selesai"
-              />
-
-              {/* Row 3 */}
-              <CampaignRow
-                image="/img/campaign3.jpg"
-                title="Pendidikan Anak Dhuafa"
-                subtitle="Dibuat 1 minggu lalu"
-                category="Pendidikan"
-                target="Rp 100,000,000"
-                collected="Rp 15,750,000"
-                progress={15}
-                status="Aktif"
-              />
+              {loading ? (
+                <tr>
+                  <td className="p-4 text-center" colSpan={6}>
+                    Loading...
+                  </td>
+                </tr>
+              ) : campaigns.length === 0 ? (
+                <tr>
+                  <td className="p-4 text-center" colSpan={6}>
+                    Belum ada campaign
+                  </td>
+                </tr>
+              ) : (
+                campaigns.map((c) => (
+                  <CampaignRow
+                    key={c.id}
+                    image={`http://127.0.0.1:8000/storage/${c.image}`}
+                    title={c.title}
+                    subtitle={`Kategori: ${c.category}`}
+                    category={c.category}
+                    target={`Rp ${c.target_amount.toLocaleString()}`}
+                    collected={`Rp ${c.collected_amount.toLocaleString()}`}
+                    progress={
+                      Math.floor(
+                        (c.collected_amount / c.target_amount) * 100
+                      ) || 0
+                    }
+                    status={c.status}
+                  />
+                ))
+              )}
             </tbody>
           </table>
-
-          {/* Pagination */}
-          <div className="flex justify-end items-center p-4 gap-2 text-sm">
-            <button className="px-3 py-1 bg-gray-200 rounded">Previous</button>
-            <button className="px-3 py-1 bg-primary text-white rounded">1</button>
-            <button className="px-3 py-1 bg-gray-200 rounded">2</button>
-            <button className="px-3 py-1 bg-gray-200 rounded">3</button>
-            <button className="px-3 py-1 bg-gray-200 rounded">Next</button>
-          </div>
         </div>
       </main>
 
@@ -105,26 +108,6 @@ export default function AdminDashboard() {
 }
 
 /* ===== COMPONENTS ===== */
-
-function StatCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: string;
-  icon: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl p-5 shadow flex items-center gap-4">
-      <div className="text-3xl">{icon}</div>
-      <div>
-        <p className="text-gray-500 text-sm">{title}</p>
-        <p className="font-bold text-xl">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 function CampaignRow({
   image,
@@ -140,7 +123,7 @@ function CampaignRow({
     <tr className="border-b">
       <td className="py-4 px-4">
         <div className="flex items-center gap-3">
-          <Image
+          <img
             src={image}
             alt="img"
             width={50}
@@ -176,7 +159,7 @@ function CampaignRow({
       <td className="py-4 px-4">
         <span
           className={`text-xs px-2 py-1 rounded-full ${
-            status === "Aktif"
+            status === "aktif"
               ? "bg-green-100 text-green-600"
               : "bg-gray-200 text-gray-600"
           }`}

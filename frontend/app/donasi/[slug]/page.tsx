@@ -1,4 +1,3 @@
-import { donationCampaigns } from "../data";
 import { slugify } from "@/app/utils/slugify";
 import {
   Heart,
@@ -15,32 +14,36 @@ import { ChevronLeft } from "lucide-react";
 export default async function CampaignDetail({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
-  console.log("Slug from URL:", slug);
-  console.log("Available campaigns:", donationCampaigns.map(item => ({
-    title: item.title,
-    slugified: slugify(item.title)
-  })));
-  const campaign = donationCampaigns.find(
-    (item) => slugify(item.title) === slug
+  const slug = params.slug;
+
+  const res = await fetch("http://127.0.0.1:8000/api/campaigns", {
+    cache: "no-store",
+  });
+
+  const json = await res.json();
+  const campaigns = json.data || [];
+
+  const campaign = campaigns.find(
+    (item: any) => slugify(item.title) === slug
   );
 
   if (!campaign) {
     return <div className="text-center py-20">Campaign tidak ditemukan 😢</div>;
   }
 
+
   return (
     <div className="max-w-6xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-10">
-  
       <div className="lg:col-span-2 space-y-8">
         <Link
-        href={`/donasi`}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary"
-      >
-        <ChevronLeft size={18} /> Kembali ke Campaign
-      </Link>
+          href={`/donasi`}
+          className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary"
+        >
+          <ChevronLeft size={18} /> Kembali ke Campaign
+        </Link>
+
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <img
@@ -68,7 +71,6 @@ export default async function CampaignDetail({
 
         <h1 className="text-2xl font-bold leading-tight">{campaign.title}</h1>
 
-
         <p className="text-gray-600 text-sm leading-relaxed">
           Mari bersama-sama memberikan kesempatan pendidikan terbaik untuk
           anak-anak kurang mampu...
@@ -76,7 +78,7 @@ export default async function CampaignDetail({
 
         <div className="relative">
           <img
-            src={campaign.image}
+            src={`http://127.0.0.1:8000/storage/${campaign.image}`}
             alt={campaign.title}
             className="rounded-xl w-full h-auto"
           />
@@ -84,7 +86,6 @@ export default async function CampaignDetail({
             1 dari 3 foto
           </p>
         </div>
-
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Latar Belakang Campaign</h2>
@@ -123,7 +124,6 @@ export default async function CampaignDetail({
           </div>
         </div>
 
-       
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Informasi Terbaru</h2>
 
@@ -153,7 +153,6 @@ export default async function CampaignDetail({
           </div>
         </div>
       </div>
-
 
       <RightDonationPanel campaign={campaign} slug={slug} />
     </div>
