@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { slugify } from "@/app/utils/slugify";
+import { useRouter } from "next/navigation";
 
 export interface DonationCampaignProps {
   title: string;
@@ -8,6 +8,7 @@ export interface DonationCampaignProps {
   collectedAmount: string;
   progress: number;
   image: string;
+  slug: string;
 }
 
 export default function DonationCampaignCard({
@@ -17,10 +18,11 @@ export default function DonationCampaignCard({
   collectedAmount,
   progress,
   image,
+  slug,
 }: DonationCampaignProps) {
 
-  const slug = slugify(title);
-
+  // const slug = props.slug;
+  const router = useRouter();
   const safeCategory = category || "Umum";
   const normalizedCategory = safeCategory.toLowerCase().replace(/\s+/g, "");
 
@@ -32,7 +34,7 @@ export default function DonationCampaignCard({
   };
 
   return (
-    <Link href={`/donasi/${slug}`}>
+    // <Link href={`/donasi/${slug}`}>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
 
         <div className="relative">
@@ -71,17 +73,23 @@ export default function DonationCampaignCard({
           </div>
 
           <div className="flex gap-2">
-            <div className="flex-1 border border-primary text-primary rounded-md py-2 text-sm text-center hover:bg-primary/10 transition">
-              Lihat Detail
-            </div>
-
-            <div className="flex-1 bg-primary text-white rounded-md py-2 text-sm text-center hover:bg-primary/90 transition">
-              Donasi
-            </div>
-          </div>
+          <button
+            onClick={() => router.push(`/donasi/${slug}`)}
+            className="flex-1 border border-primary text-primary rounded-md py-2 text-sm text-center hover:bg-primary/10 transition"
+          >
+            Lihat Detail
+          </button>
+            
+          <button
+            onClick={() => router.push(`/donasi/${slug}`)}
+            className="flex-1 bg-primary text-white rounded-md py-2 text-sm text-center hover:bg-primary/90 transition"
+          >
+            Donasi
+          </button>
+        </div>
         </div>
 
       </div>
-    </Link>
+    // </Link>
   );
 }

@@ -6,6 +6,7 @@ import {
   BookOpen,
   School,
   Users,
+  MapPin,
 } from "lucide-react";
 import RightDonationPanel from "./rightdonationpanel";
 import Link from "next/link";
@@ -14,9 +15,9 @@ import { ChevronLeft } from "lucide-react";
 export default async function CampaignDetail({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const slug = params.slug;
+  const {slug} = await params;
 
   const res = await fetch("http://127.0.0.1:8000/api/campaigns", {
     cache: "no-store",
@@ -25,8 +26,11 @@ export default async function CampaignDetail({
   const json = await res.json();
   const campaigns = json.data || [];
 
+  console.log("URL Slug:", slug);
+  console.log("Available Slugs:", campaigns.map((item: any) => item.slug));
+
   const campaign = campaigns.find(
-    (item: any) => slugify(item.title) === slug
+    (item: any) => item.slug === slug
   );
 
   if (!campaign) {
@@ -47,7 +51,7 @@ export default async function CampaignDetail({
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <img
-              src="/assets/foto.jpg"
+              src="/assets/poto.jpg"
               alt="author"
               className="w-10 h-10 rounded-full"
             />
@@ -72,8 +76,7 @@ export default async function CampaignDetail({
         <h1 className="text-2xl font-bold leading-tight">{campaign.title}</h1>
 
         <p className="text-gray-600 text-sm leading-relaxed">
-          Mari bersama-sama memberikan kesempatan pendidikan terbaik untuk
-          anak-anak kurang mampu...
+          {campaign.description}
         </p>
 
         <div className="relative">
@@ -82,19 +85,19 @@ export default async function CampaignDetail({
             alt={campaign.title}
             className="rounded-xl w-full h-auto"
           />
-          <p className="absolute bottom-3 right-3 text-xs bg-black/40 text-white px-3 py-1 rounded-lg">
-            1 dari 3 foto
-          </p>
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Latar Belakang Campaign</h2>
+          <h2 className="text-lg font-semibold">Lokasi</h2>
+           <div className="flex items-start gap-2">
+          <MapPin size={20} className="flex-shrink-0 mt-0.5 text-primary" />
           <p className="text-gray-600 text-sm leading-relaxed">
-            Di pelosok Desa Pandanlandung, Malang, Jawa Timur ...
+            {campaign.location}
           </p>
+          </div>
         </div>
 
-        <div className="space-y-3">
+        {/* <div className="space-y-3">
           <h2 className="text-lg font-semibold">Penggunaan Dana</h2>
 
           <div className="space-y-2">
@@ -122,7 +125,7 @@ export default async function CampaignDetail({
               <p>Rp 27.000.000</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Informasi Terbaru</h2>

@@ -29,6 +29,7 @@ export default function CampaignList({ data }: { data: any[] }) {
             collectedAmount={"Rp " + collected.toLocaleString("id-ID")}
             progress={progress}
             image={`http://127.0.0.1:8000/storage/${item.image}`}
+            slug={item.slug}
           />
         );
       })}

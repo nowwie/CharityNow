@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   if (res.ok) {
     alert("Campaign berhasil dihapus");
 
-    // refresh halaman
+  
     window.location.reload();
   } else {
     alert(data.message || "Gagal menghapus campaign");
@@ -133,7 +133,6 @@ export default function AdminDashboard() {
   );
 }
 
-/* ===== COMPONENTS ===== */
 
 function CampaignRow({
   id,

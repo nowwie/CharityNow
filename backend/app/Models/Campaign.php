@@ -11,6 +11,7 @@ class Campaign extends Model
 
     protected $fillable = [
         'title',
+        'slug',
         'description',
         'category',
         'location',
@@ -27,7 +28,6 @@ class Campaign extends Model
         'end_date' => 'date',
     ];
 
-    // Accessor untuk full image URL
     public function getImageUrlAttribute()
     {
         return $this->image ? asset('storage/' . $this->image) : null;

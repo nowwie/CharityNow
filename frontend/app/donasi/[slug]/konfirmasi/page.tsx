@@ -2,15 +2,37 @@
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { donationCampaigns } from "../../data";
-import { slugify } from "@/app/utils/slugify";
-import { useState, useEffect } from "react";
-import { use } from "react";
+import { useEffect, useState, use } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
 
+  const searchParams = useSearchParams();
+  const amount = searchParams.get("amount"); 
+  console.log("Nominal dari FE:", amount);
+  
+  const [campaign, setCampaign] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch("http://127.0.0.1:8000/api/campaigns", {
+        cache: "no-store",
+      });
+      const json = await res.json();
+
+      const campaigns = json.data || [];
+
+      const found = campaigns.find((item: any) => item.slug === slug);
+
+      setCampaign(found || null);
+      setLoading(false);
+    }
+
+    load();
+  }, [slug]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,13 +48,11 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
     return `${m}:${s}`;
   };
 
-  const campaign = donationCampaigns.find(
-    (item) => slugify(item.title) === slug
-  );
 
-  if (!campaign) {
+  if (loading) return <div className="p-20 text-center">Loading...</div>;
+
+  if (!campaign)
     return <div className="p-20 text-center">Campaign tidak ditemukan 😢</div>;
-  }
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
@@ -44,7 +64,6 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         <ChevronLeft size={18} /> Kembali ke Campaign
       </Link>
 
-      {/* Title */}
       <h1 className="text-center text-2xl font-bold">Konfirmasi Donasi</h1>
       <p className="text-center text-gray-600 text-sm">
         Silakan periksa kembali detail donasi kamu sebelum melanjutkan ke pembayaran
@@ -56,19 +75,17 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         <span className="font-bold">{formatTime(timeLeft)}</span>
       </div>
 
-      {/* === CARD DETAIL === */}
+      {/* CARD DETAIL */}
       <div className="bg-white border rounded-xl shadow-sm p-6 space-y-5">
 
         {/* Header campaign */}
         <div className="bg-primary rounded-lg p-4 text-white">
           <p className="font-semibold text-sm">{campaign.title}</p>
           <p className="text-xs opacity-90">Yayasan Peduli Anak Indonesia</p>
-          <p className="text-xs mt-1">
-            1.324 donatur • {campaign.progress}% tercapai
-          </p>
+          <p className="text-xs mt-1">{campaign.progress || 0}% tercapai</p>
         </div>
 
-        {/* Info donor + donasi */}
+        {/* Info donor */}
         <div className="grid grid-cols-2 gap-6 text-sm">
           <div>
             <p className="text-gray-500">Nama Donatur</p>
@@ -76,11 +93,11 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
           </div>
           <div>
             <p className="text-gray-500">Nominal Donasi</p>
-            <p className="font-semibold text-primary">Rp 250.000</p>
+            <p className="font-semibold text-primary">Rp {Number(amount || 0).toLocaleString("id-ID")}</p>
           </div>
           <div>
             <p className="text-gray-500">Tanggal Donasi</p>
-            <p className="font-medium">19 Oktober 2024</p>
+            <p className="font-medium">{new Date().toLocaleDateString("id-ID")}</p>
           </div>
           <div>
             <p className="text-gray-500">Metode Pembayaran</p>
@@ -103,7 +120,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <p>Nominal Donasi</p>
-            <p>Rp 250.000</p>
+            <p>Rp {Number(amount || 0).toLocaleString("id-ID")}</p>
           </div>
           <div className="flex justify-between">
             <p>Biaya Admin</p>
@@ -111,7 +128,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
           </div>
           <div className="flex justify-between font-bold pt-2 border-t">
             <p>Total Pembayaran</p>
-            <p className="text-primary">Rp 250.000</p>
+            <p className="text-primary">Rp {Number(amount || 0).toLocaleString("id-ID")}</p>
           </div>
         </div>
       </div>
@@ -119,10 +136,10 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
       {/* BUTTONS */}
       <div className="flex gap-4">
         <Link
-          href={`/donasi/${slug}/berhasil`}
+          href={`/donasi/${slug}/berhasil?amount=${amount}`}
           className="flex-1 bg-primary/80 text-white py-2 rounded-lg font-medium text-center hover:bg-primary transition"
         >
-          Bayar Sekarang
+          Konfirmasi Pembayaran
         </Link>
 
         <Link
@@ -133,7 +150,6 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         </Link>
       </div>
 
-
       {/* Footer info */}
       <div className="bg-purple-50 text-center text-xs text-gray-600 p-4 rounded-lg border border-primary/20">
         <p className="font-semibold text-primary mb-1">💜 Jaminan Transparansi</p>
@@ -142,7 +158,6 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
           penyaluran di halaman campaign.
         </p>
       </div>
-
     </div>
   );
 }

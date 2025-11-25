@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Campaign;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CampaignController extends Controller
 {
@@ -41,10 +42,11 @@ class CampaignController extends Controller
                 'status' => 'nullable|string',
                 'start_date' => 'nullable|date',
                 'end_date' => 'nullable|date|after_or_equal:start_date',
-                'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' // 5MB
+                'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120' 
             ]);
+            $validated['slug'] = Str::slug($validated['title']);
 
-            // Upload gambar
+         
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
                 $path = $file->store('campaigns', 'public');
@@ -53,7 +55,7 @@ class CampaignController extends Controller
                 Log::info('Image uploaded', ['path' => $path]);
             }
 
-            // Set default status jika tidak ada
+           
             if (!isset($validated['status'])) {
                 $validated['status'] = 'draft';
             }
@@ -120,9 +122,9 @@ class CampaignController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:5120'
             ]);
 
-            // Upload gambar baru
+            
             if ($request->hasFile('image')) {
-                // Hapus gambar lama
+               
                 if ($campaign->image && Storage::disk('public')->exists($campaign->image)) {
                     Storage::disk('public')->delete($campaign->image);
                 }
@@ -158,7 +160,6 @@ class CampaignController extends Controller
         try {
             $campaign = Campaign::findOrFail($id);
 
-            // Hapus gambar
             if ($campaign->image && Storage::disk('public')->exists($campaign->image)) {
                 Storage::disk('public')->delete($campaign->image);
             }
