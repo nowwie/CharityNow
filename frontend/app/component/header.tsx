@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { User } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
@@ -10,12 +11,16 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm py-3 px-8 flex items-center justify-between">
 
-      <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
+      {/* LOGO */}
+      <div
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => router.push("/")}
+      >
         <Image src="/assets/Vector.png" width={32} height={32} alt="logo" />
         <h1 className="text-primary font-semibold text-xl">CharityNow</h1>
       </div>
 
-
+      {/* NAVIGATION */}
       <nav className="flex gap-8 text-sm font-medium">
         <a
           href="/dashboard"
@@ -23,18 +28,21 @@ export default function Header() {
         >
           Dashboard
         </a>
+
         <a
           href="/donasi"
           className={pathname === "/donasi" ? "text-primary" : "text-gray-600"}
         >
           Donasi
         </a>
+
         <a
           href="/profile"
           className={pathname === "/profile" ? "text-primary" : "text-gray-600"}
         >
           Riwayat Donasi
         </a>
+
         {pathname === "/dashboard" ? (
           <a href="#about-section" className="text-gray-600 hover:text-primary">
             Tentang Kami
@@ -49,17 +57,14 @@ export default function Header() {
         )}
       </nav>
 
-
+      {/* PROFILE + LOGOUT */}
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full overflow-hidden"  onClick={() => router.push("/profile")}>
-          <Image
-            src="/assets/proof.jpg"
-            alt="profile"
-            width={40}
-            height={40}
-            className="object-cover w-full h-full"
-          />
-        </div>
+        <button
+          onClick={() => router.push("/profile")}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-white hover:bg-primary/20 transition"
+        >
+          <User size={28} className="text-gray-700" />
+        </button>
 
         <button
           className="bg-primary hover:bg-primary/80 text-white px-4 py-1 rounded-md transition"
@@ -68,6 +73,7 @@ export default function Header() {
           Logout
         </button>
       </div>
+
     </header>
   );
 }

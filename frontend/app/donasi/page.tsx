@@ -6,10 +6,21 @@ import SearchBar from "./component/search";
 import CampaignList from "./component/campaignlist";
 import Header from "../component/header";
 import Footer from "../component/footer";
+import Pagination from "./component/pagination";
 
 export default function DonasiPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(campaigns.length / itemsPerPage);
+
+  const paginatedData = campaigns.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
 
   useEffect(() => {
     async function load() {
@@ -24,17 +35,20 @@ export default function DonasiPage() {
     load();
   }, []);
 
-  const handleFilter = (category: string) => {
-    if (category === "Semua") {
-      setFiltered(campaigns);
-    } else {
-      setFiltered(
-        campaigns.filter((item) =>
-          item.title.toLowerCase().includes(category.toLowerCase())
-        )
-      );
-    }
-  };
+ const handleFilter = (category: string) => {
+  if (category === "") {
+    setFiltered(campaigns);
+  } else {
+    setFiltered(
+      campaigns.filter((item) =>
+        item.category.toLowerCase() === category.toLowerCase()
+      )
+    );
+  }
+
+  setCurrentPage(1); // reset pagination ke halaman 1
+};
+
 
   const handleSearch = (query: string) => {
     setFiltered(
@@ -70,13 +84,11 @@ export default function DonasiPage() {
 
         <CampaignList data={filtered} />
 
-        <div className="flex justify-center gap-3 py-6">
-          <button className="px-4 py-2 rounded-md border">1</button>
-          <button className="px-4 py-2 rounded-md border bg-primary text-white">
-            2
-          </button>
-          <button className="px-4 py-2 rounded-md border">3</button>
-        </div>
+        <Pagination
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+
 
       </div>
 

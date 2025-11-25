@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 
-export default function AddCampaignPage() {
+export default function EditCampaignPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params); 
+  const router = useRouter();
+
+
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -12,25 +18,51 @@ export default function AddCampaignPage() {
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
-  const [status, setStatus] = useState("draft"); // ← Ubah jadi string, bukan array
+  const [status, setStatus] = useState("draft");
   const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/campaigns");
+        const json = await res.json();
+
+        const found = json.data.find((c: any) => c.id == id);
+        if (!found) {
+          alert("Campaign tidak ditemukan");
+          router.push("/admin/dashboard");
+          return;
+        }
+
+        setTitle(found.title);
+        setDescription(found.description);
+        setCategory(found.category);
+        setLocation(found.location || "");
+        setTargetAmount(found.target_amount);
+        setStartDate(found.start_date || "");
+        setEndDate(found.end_date || "");
+        setStatus(found.status || "draft");
+        setPreview(`http://127.0.0.1:8000/storage/${found.image}`);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSaving(true);
     setError("");
-    setLoading(true);
-
-    // Validasi sederhana
-    if (!title || !description || !category || !targetAmount) {
-      setError("Harap isi semua field yang wajib");
-      setLoading(false);
-      return;
-    }
 
     try {
-      // Ambil token (jika pakai auth)
       const token = localStorage.getItem("token");
 
       const formData = new FormData();
@@ -39,52 +71,51 @@ export default function AddCampaignPage() {
       formData.append("category", category);
       formData.append("location", location);
       formData.append("target_amount", targetAmount);
-      formData.append("status", status); // ← Kirim sebagai string
+      formData.append("status", status);
 
       if (startDate) formData.append("start_date", startDate);
       if (endDate) formData.append("end_date", endDate);
       if (image) formData.append("image", image);
 
-      console.log("Sending request...");
-
-      const res = await fetch("http://127.0.0.1:8000/api/campaigns", {
+      const res = await fetch(`http://127.0.0.1:8000/api/campaigns/${id}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
+          "X-HTTP-Method-Override": "PUT",
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
 
       const data = await res.json();
-      console.log("Response:", data);
 
       if (!res.ok) {
-        // Handle validation errors
         if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat().join(", ");
-          setError(errorMessages);
+          const msg = Object.values(data.errors).flat().join(", ");
+          setError(msg);
         } else {
-          setError(data.message || "Gagal membuat campaign");
+          setError(data.message || "Gagal update");
         }
-        setLoading(false);
+        setSaving(false);
         return;
       }
 
-      alert("Campaign berhasil ditambahkan!");
-      window.location.href = "/admin/dashboard";
-
+      alert("Campaign berhasil diperbarui!");
+      router.push("/admin/dashboard");
     } catch (err: any) {
-      console.error("Error:", err);
-      setError("Terjadi kesalahan koneksi: " + err.message);
-      setLoading(false);
+      setError("Error: " + err.message);
     }
+
+    setSaving(false);
   }
+
+  if (loading)
+    return <div className="p-10 text-center text-lg">Memuat data...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <Link
-        href="/admin/campaign"
+        href="/admin/dashboard"
         className="flex items-center w-fit gap-2 text-gray-700 hover:text-black mb-6"
       >
         <ArrowLeft size={20} />
@@ -92,27 +123,24 @@ export default function AddCampaignPage() {
       </Link>
 
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-semibold">Tambah Campaign Baru</h1>
-        <p className="text-gray-500 mb-6">
-          Lengkapi detail campaign untuk dipublikasikan
-        </p>
+        <h1 className="text-2xl font-semibold">Edit Campaign</h1>
+        <p className="text-gray-500 mb-6">Perbarui detail campaign kamu</p>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border">
-          {/* Form dengan onSubmit */}
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             {/* JUDUL */}
             <div>
               <label className="font-medium">
                 Judul Campaign <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                placeholder="Maksimal 100 karakter"
                 className="mt-2 p-3 w-full border rounded-lg"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                maxLength={100}
                 required
               />
             </div>
@@ -131,11 +159,10 @@ export default function AddCampaignPage() {
             {/* DESKRIPSI */}
             <div className="md:col-span-2">
               <label className="font-medium">
-                Deskripsi Campaign <span className="text-red-500">*</span>
+                Deskripsi <span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={4}
-                placeholder="Jelaskan tujuan dan manfaat campaign"
                 className="mt-2 p-3 w-full border rounded-lg"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -151,14 +178,13 @@ export default function AddCampaignPage() {
                 className="mt-2 p-3 w-full border rounded-lg"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                min={startDate} // Tidak bisa pilih tanggal sebelum start_date
               />
             </div>
 
             {/* KATEGORI */}
             <div>
               <label className="font-medium">
-                Kategori Campaign <span className="text-red-500">*</span>
+                Kategori <span className="text-red-500">*</span>
               </label>
               <select
                 className="mt-2 p-3 w-full border rounded-lg"
@@ -171,15 +197,13 @@ export default function AddCampaignPage() {
                 <option value="gizi">Gizi Anak & Balita</option>
                 <option value="siapsaji">Makanan Siap Saji</option>
                 <option value="darurat">Pangan Darurat</option>
-
               </select>
             </div>
 
+            {/* LOKASI */}
             <div>
               <label className="font-medium">Lokasi Campaign</label>
               <input
-                type="text"
-                placeholder="Kota atau wilayah campaign"
                 className="mt-2 p-3 w-full border rounded-lg"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -193,33 +217,27 @@ export default function AddCampaignPage() {
               <label className="mt-2 w-full h-40 border rounded-lg border-dashed flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:border-gray-400">
                 <input
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/gif"
+                  accept="image/*"
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
-                      // Validasi ukuran file (max 5MB)
-                      if (file.size > 5 * 1024 * 1024) {
-                        setError("Ukuran gambar maksimal 5MB");
-                        return;
-                      }
                       setImage(file);
+                      setPreview(URL.createObjectURL(file));
                     }
                   }}
                 />
 
-                {image ? (
-                  <div className="text-center">
-                    <p className="font-medium text-green-600">✓ {image.name}</p>
-                    <p className="text-xs mt-1">
-                      {(image.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="h-full object-cover rounded-lg"
+                  />
                 ) : (
                   <>
                     <p className="text-3xl">📤</p>
-                    <p>Tarik dan lepas gambar atau klik untuk upload</p>
-                    <p className="text-xs">PNG, JPG, GIF hingga 5MB</p>
+                    <p>Upload Foto</p>
                   </>
                 )}
               </label>
@@ -228,15 +246,13 @@ export default function AddCampaignPage() {
             {/* TARGET DONASI */}
             <div className="md:col-span-2">
               <label className="font-medium">
-                Target Donasi (Rp) <span className="text-red-500">*</span>
+                Target Donasi <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                placeholder="Masukkan nominal dalam rupiah"
                 className="mt-2 p-3 w-full border rounded-lg"
                 value={targetAmount}
                 onChange={(e) => setTargetAmount(e.target.value)}
-                min="1"
                 required
               />
             </div>
@@ -245,8 +261,8 @@ export default function AddCampaignPage() {
             <div className="md:col-span-2 bg-gray-100 p-4 rounded-lg">
               <label className="font-medium">Status Campaign</label>
 
-              <div className="flex flex-col gap-2 mt-3 text-gray-700">
-                <label className="flex items-center gap-3 cursor-pointer">
+              <div className="flex flex-col gap-2 mt-3">
+                <label className="flex items-center gap-3">
                   <input
                     type="radio"
                     name="status"
@@ -254,10 +270,10 @@ export default function AddCampaignPage() {
                     checked={status === "draft"}
                     onChange={(e) => setStatus(e.target.value)}
                   />
-                  Draft (belum dipublikasikan)
+                  Draft
                 </label>
 
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex items-center gap-3">
                   <input
                     type="radio"
                     name="status"
@@ -265,10 +281,10 @@ export default function AddCampaignPage() {
                     checked={status === "active"}
                     onChange={(e) => setStatus(e.target.value)}
                   />
-                  Aktif (sedang berjalan)
+                  Aktif
                 </label>
 
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex items-center gap-3">
                   <input
                     type="radio"
                     name="status"
@@ -276,36 +292,37 @@ export default function AddCampaignPage() {
                     checked={status === "closed"}
                     onChange={(e) => setStatus(e.target.value)}
                   />
-                  Ditutup (selesai)
+                  Ditutup
                 </label>
               </div>
             </div>
 
-            {/* ERROR MESSAGE */}
+            {/* ERROR */}
             {error && (
-              <div className="md:col-span-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 md:col-span-2">
                 {error}
               </div>
             )}
 
-            {/* BUTTONS */}
-            <div className="md:col-span-2 flex justify-end gap-4 mt-4">
+            {/* BUTTON */}
+            <div className="md:col-span-2 flex justify-end gap-4">
               <Link
-                href="/admin/campaign"
-                className="px-6 py-2 border rounded-lg hover:bg-gray-50"
+                href="/admin/dashboard"
+                className="px-6 py-2 border rounded-lg hover:bg-gray-100"
               >
                 Batal
               </Link>
 
               <button
                 type="submit"
-                disabled={loading}
-                className={`px-6 py-2 rounded-lg text-white ${loading
+                disabled={saving}
+                className={`px-6 py-2 rounded-lg text-white ${
+                  saving
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-[#8A239E] hover:bg-[#7A1F8D]"
-                  }`}
+                }`}
               >
-                {loading ? "Menyimpan..." : "Simpan Campaign"}
+                {saving ? "Menyimpan..." : "Update Campaign"}
               </button>
             </div>
           </form>

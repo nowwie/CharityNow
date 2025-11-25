@@ -13,6 +13,7 @@ Route::options('{any}', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('auth:sanctum')->put('/update-profile', [AuthController::class, 'updateProfile']);
 
 Route::get('/campaigns', [CampaignController::class, 'index']);
 

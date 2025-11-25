@@ -5,9 +5,10 @@ const categories = [
   { label: "Semua", value: "" },
   { label: "Paket Sembako", value: "sembako" },
   { label: "Gizi Anak & Balita", value: "gizi" },
-  { label: "Makanan Siap Saji", value: "siap saji" },
+  { label: "Makanan Siap Saji", value: "siapsaji" },
   { label: "Pangan Darurat", value: "darurat" },
 ];
+
 
 export default function FilterPills({ onChange }: { onChange: (c: string) => void }) {
   const [active, setActive] = useState("Semua");

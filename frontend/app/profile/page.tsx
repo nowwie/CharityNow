@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Pencil, LogOut, FileText, ArrowRight } from "lucide-react";
+import { Pencil, LogOut, FileText, ArrowRight, User } from "lucide-react";
 import Header from "../component/header";
 import Footer from "../component/footer";
 import { useState, useEffect } from "react";
@@ -35,7 +35,6 @@ export default function ProfilePage() {
             const userData = await resUser.json();
             setUser(userData);
 
-            // 2. Fetch donation history
             const resHistory = await fetch("http://127.0.0.1:8000/api/my-donations", {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -83,12 +82,7 @@ export default function ProfilePage() {
                                 className="w-20 h-20 rounded-full overflow-hidden cursor-pointer"
                                 onClick={() => router.push("/profile")}
                             >
-                                <Image
-                                    src="/assets/proof.jpg"
-                                    width={80}
-                                    height={80}
-                                    alt="Profile"
-                                    className="w-full h-full object-cover rounded-full"
+                                <User size={80} className="text-gray-400"
                                 />
                             </div>
 
@@ -99,7 +93,10 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="flex gap-3">
-                            <button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
+                            <button
+                                className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+                                onClick={() => router.push("/profile/edit")}
+                            >
                                 <Pencil size={16} /> Edit Profil
                             </button>
                             <button

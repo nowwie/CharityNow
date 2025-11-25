@@ -196,8 +196,7 @@ function CampaignRow({
       </td>
 
       <td className="py-4 px-4 flex gap-3">
-        <button className="text-blue-600 text-lg">👁</button>
-        <button className="text-yellow-500 text-lg">✏️</button>
+        <button className="text-yellow-500 text-lg" onClick={()=> window.location.href = `/admin/campaign/edit/${id}`}>✏️</button>
         <button className="text-red-500 text-lg" onClick={() =>onDelete(id)}>🗑</button>
       </td>
     </tr>

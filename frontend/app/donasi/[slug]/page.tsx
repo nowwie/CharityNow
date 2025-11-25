@@ -7,6 +7,7 @@ import {
   School,
   Users,
   MapPin,
+  User,
 } from "lucide-react";
 import RightDonationPanel from "./rightdonationpanel";
 import Link from "next/link";
@@ -50,10 +51,7 @@ export default async function CampaignDetail({
 
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <img
-              src="/assets/poto.jpg"
-              alt="author"
-              className="w-10 h-10 rounded-full"
+            <User size={32} className="text-purple-600"
             />
 
             <div>
