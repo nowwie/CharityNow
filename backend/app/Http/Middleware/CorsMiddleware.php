@@ -9,9 +9,18 @@ class CorsMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        $allowedOrigins = [
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://192.168.1.5:3000', // kalau kamu pakai LAN
+        ];
+        $origin = $request->headers->get('Origin');
         $response = $next($request);
        
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+        if (in_array($origin, $allowedOrigins)) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+        }
+        // $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');

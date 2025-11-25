@@ -9,9 +9,9 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
   const { slug } = use(params);
 
   const searchParams = useSearchParams();
-  const amount = searchParams.get("amount"); 
+  const amount = searchParams.get("amount");
   console.log("Nominal dari FE:", amount);
-  
+
   const [campaign, setCampaign] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
@@ -53,6 +53,33 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
 
   if (!campaign)
     return <div className="p-20 text-center">Campaign tidak ditemukan 😢</div>;
+
+  async function submitDonasi() {
+    const token = localStorage.getItem("token");
+    const res = await fetch("http://127.0.0.1:8000/api/admin/donations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        campaign_id: campaign.id,
+        amount: amount,
+        payment_method: "QRIS",
+        message: "",
+        status: "success",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      window.location.href = `/donasi/${slug}/berhasil?amount=${amount}`;
+    } else {
+      alert("Gagal memproses donasi: " + data.message);
+    }
+  }
+
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
@@ -135,12 +162,12 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
 
       {/* BUTTONS */}
       <div className="flex gap-4">
-        <Link
-          href={`/donasi/${slug}/berhasil?amount=${amount}`}
-          className="flex-1 bg-primary/80 text-white py-2 rounded-lg font-medium text-center hover:bg-primary transition"
+        <button
+          onClick={submitDonasi}
+          className="flex-1 bg-primary/80 text-white py-2 rounded-lg font-medium hover:bg-primary transition"
         >
-          Konfirmasi Pembayaran
-        </Link>
+          Bayar Sekarang
+        </button>
 
         <Link
           href={`/donasi/${slug}`}

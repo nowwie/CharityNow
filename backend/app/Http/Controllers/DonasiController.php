@@ -21,7 +21,7 @@ class DonasiController extends Controller
 
         $donasi = Donasi::create([
             'campaign_id' => $validated['campaign_id'],
-            'user_id' => $validated['user_id'] ?? null,
+            'user_id' => auth()->id(),
             'amount' => $validated['amount'],
             'payment_method' => $validated['payment_method'],
             'message' => $validated['message'] ?? null,
