@@ -152,7 +152,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         <div className="bg-gray-50 border rounded-lg p-6 text-center">
           <p className="text-sm font-medium mb-3">Scan QR Code untuk Pembayaran</p>
 
-          <img src="/assets/qrcode.png" className="mx-auto w-40 h-40" />
+          <img src="/assets/qr.jpg" className="mx-auto w-40 h-40" />
 
           <p className="text-xs text-gray-600 mt-3">
             Scan menggunakan aplikasi mobile banking atau e-wallet
