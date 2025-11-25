@@ -7,8 +7,49 @@ import AboutSection from "./component/about";
 import Footer from "../component/footer";
 import Image from "next/image";
 import { stats, featuredCampaigns } from "./data";
+import { useEffect, useState } from "react";
+
+interface CampaignCardData {
+    title: string;
+    desc: string;
+    progress: number;
+    image: string;
+    slug: string;
+}
+
 
 export default function DashboardPage() {
+    const [campaigns, setCampaigns] = useState<CampaignCardData[]>([]);
+
+    useEffect(() => {
+        async function load() {
+            const res = await fetch("http://127.0.0.1:8000/api/campaigns");
+            const json = await res.json();
+
+            const mapped: CampaignCardData[] = json.data
+                .slice(0, 3)
+                .map((c: any) => {
+                    const progress = Math.round(
+                        (Number(c.collected_amount ?? 0) / Number(c.target_amount ?? 1)) * 100
+                    );
+
+                    return {
+                        title: c.title,
+                        desc: c.description,
+                        progress,
+                        image: c.image
+                            ? `http://127.0.0.1:8000/storage/${c.image}`
+                            : "/assets/campaign.jpg",
+                        slug: c.slug,
+                    };
+                });
+
+            setCampaigns(mapped);
+            }
+
+            load();
+        }, []);
+
     return (
         <div>
             <Header />
@@ -48,13 +89,13 @@ export default function DashboardPage() {
                 <div>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold text-lg">Campaign Unggulan</h3>
-                        <a href="#" className="text-primary hover:underline">
+                        <a href="/donasi" className="text-primary hover:underline">
                             Lihat Semua
                         </a>
                     </div>
 
                     <div className="grid grid-cols-3 gap-6">
-                        {featuredCampaigns.map((campaign, i) => (
+                        {campaigns.map((campaign, i) => (
                             <CampaignCard key={i} {...campaign} />
                         ))}
                     </div>

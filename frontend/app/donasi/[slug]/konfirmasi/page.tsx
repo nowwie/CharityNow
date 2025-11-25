@@ -12,9 +12,11 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
   const amount = searchParams.get("amount");
   console.log("Nominal dari FE:", amount);
 
+  const isAnonymous = searchParams.get("anonymous") === "1";
   const [campaign, setCampaign] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -48,6 +50,21 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
     return `${m}:${s}`;
   };
 
+    useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("http://127.0.0.1:8000/api/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setUser(data));
+  }, []);
+
+ const donorName = isAnonymous
+    ? "Hamba Allah"
+    : (user?.name || "Donatur");
 
   if (loading) return <div className="p-20 text-center">Loading...</div>;
 
@@ -79,8 +96,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
       alert("Gagal memproses donasi: " + data.message);
     }
   }
-
-
+  
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
 
@@ -116,7 +132,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
         <div className="grid grid-cols-2 gap-6 text-sm">
           <div>
             <p className="text-gray-500">Nama Donatur</p>
-            <p className="font-medium">Hamba Allah</p>
+            <p className="font-medium">{donorName}</p>
           </div>
           <div>
             <p className="text-gray-500">Nominal Donasi</p>

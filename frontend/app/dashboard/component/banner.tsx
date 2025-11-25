@@ -1,6 +1,9 @@
 import { HandHeart, Heart , Handshake } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function HeroBanner() {
+  const router = useRouter();
+
   return (
     <div className="relative bg-gradient-to-br from-primary to-[#A855F7] text-white rounded-2xl p-10 flex flex-col justify-center text-center">
        <Handshake
@@ -18,7 +21,9 @@ export default function HeroBanner() {
         Setiap donasi adalah harapan baru bagi mereka yang membutuhkan
       </p>
 
-      <button className="flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-md font-semibold w-max mx-auto hover:bg-gray-100 transition">
+      <button 
+      onClick={() => router.push("/donasi")}
+      className="flex items-center gap-2 bg-white text-primary px-6 py-3 rounded-md font-semibold w-max mx-auto hover:bg-gray-100 transition">
         <HandHeart size={20} />
         Donasi Sekarang
       </button>

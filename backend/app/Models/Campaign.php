@@ -33,5 +33,15 @@ class Campaign extends Model
         return $this->image ? asset('storage/' . $this->image) : null;
     }
 
-    
+    protected $appends = ['progress'];
+
+    public function getProgressAttribute()
+    {
+        if (!$this->target_amount)
+            return 0;
+        return round(($this->collected_amount / $this->target_amount) * 100);
+    }
+
+
+
 }

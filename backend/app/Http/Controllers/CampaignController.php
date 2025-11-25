@@ -67,6 +67,7 @@ class CampaignController extends Controller
                 'message' => 'Campaign berhasil dibuat',
                 'data' => $campaign
             ], 201);
+            
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation error', ['errors' => $e->errors()]);

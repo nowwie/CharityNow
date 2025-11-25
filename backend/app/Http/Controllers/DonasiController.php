@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Donasi;
 use Illuminate\Http\Request;
 use App\Application\UseCases\CreateDonasiUseCase;
+use App\Models\Campaign;
 
 class DonasiController extends Controller
 {
@@ -12,7 +13,7 @@ class DonasiController extends Controller
     {
         $validated = $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',
-            'user_id' => 'nullable|exists:users,id', 
+            'user_id' => 'nullable|exists:users,id',
             'amount' => 'required|integer|min:1000',
             'payment_method' => 'required|string',
             'message' => 'nullable|string',
@@ -28,10 +29,29 @@ class DonasiController extends Controller
             'status' => $validated['status'],
         ]);
 
+        $campaign = Campaign::find($validated['campaign_id']);
+        $campaign->collected_amount += $validated['amount'];
+        $campaign->save();
+
+
         return response()->json([
             "message" => "Donasi berhasil ditambahkan",
             "donasi" => $donasi
         ], 201);
     }
+
+    public function myDonations(Request $request)
+    {
+        $donations = Donasi::with('campaign')
+            ->where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $donations
+        ]);
+    }
+
 
 }

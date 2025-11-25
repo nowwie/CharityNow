@@ -1,19 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
 export default function RightDonationPanel({
   campaign,
   slug,
 }: {
-  // campaign: {
-  //   title: string;
-  //   image: string;
-  //   collectedAmount: string | number;
-  //   progress: number;
-  // }
   campaign: any;
   slug: string;
 }) {
@@ -45,6 +39,30 @@ export default function RightDonationPanel({
     month: "long",
     year: "numeric",
   });
+
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    async function loadUser() {
+      const res = await fetch("http://127.0.0.1:8000/api/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      }
+    }
+
+    loadUser();
+  }, []);
+
 
   return (
     <div className="bg-white border rounded-xl p-6 shadow-sm space-y-6 min-w-[280px] lg:sticky lg:top-24">
@@ -89,7 +107,7 @@ export default function RightDonationPanel({
         <img src="/assets/proof.jpg" className="w-10 h-10 rounded-full" />
         <div>
           <p className="text-xs text-gray-500">Donasi sebagai</p>
-          <p className="font-semibold text-sm">Sari Dewi</p>
+          <p className="font-semibold text-sm">{user ? user.name : "Memuat..."}</p>
         </div>
       </div>
 
@@ -105,8 +123,8 @@ export default function RightDonationPanel({
                 setCustomAmount("");
               }}
               className={`border rounded-md py-2 text-sm transition ${selectedAmount === amount
-                  ? "bg-primary text-white border-primary"
-                  : "border-gray-300 text-gray-700"
+                ? "bg-primary text-white border-primary"
+                : "border-gray-300 text-gray-700"
                 }`}
             >
               Rp {amount.toLocaleString("id-ID")}
@@ -169,7 +187,7 @@ export default function RightDonationPanel({
         </div>
       </div>
 
-      <Link href={`/donasi/${slug}/konfirmasi?amount=${selectedAmount || customAmount}`}>
+      <Link href={`/donasi/${slug}/konfirmasi?amount=${selectedAmount || customAmount}&anonymous=${anonymous ? 1 : 0}`}>
         <button className="w-full bg-primary text-white py-2 rounded-md">
           Donasi Sekarang
         </button>

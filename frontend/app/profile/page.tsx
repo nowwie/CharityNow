@@ -11,6 +11,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [donationHistory, setDonationHistory] = useState<any[]>([]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -20,26 +21,35 @@ export default function ProfilePage() {
             return;
         }
 
-        async function loadUser() {
-            const res = await fetch("http://127.0.0.1:8000/api/me", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        async function loadAll() {
+            const resUser = await fetch("http://127.0.0.1:8000/api/me", {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
-            if (!res.ok) {
+            if (!resUser.ok) {
                 localStorage.removeItem("token");
                 router.push("/login");
                 return;
             }
 
-            const data = await res.json();
-            setUser(data);
+            const userData = await resUser.json();
+            setUser(userData);
+
+            // 2. Fetch donation history
+            const resHistory = await fetch("http://127.0.0.1:8000/api/my-donations", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const jsonHistory = await resHistory.json();
+
+            if (jsonHistory.success) {
+                setDonationHistory(jsonHistory.data);
+            }
+
             setLoading(false);
         }
 
-        loadUser();
+        loadAll();
     }, []);
 
     const handleLogout = () => {
@@ -47,49 +57,22 @@ export default function ProfilePage() {
         router.push("/login");
     };
 
-    const history = [
-        {
-            title: "Bantuan Bencana Alam Lombok",
-            date: "15 Oktober 2024 • 14:30 WIB",
-            amount: "Rp 500.000",
-            status: "Berhasil",
-            statusColor: "bg-green-100 text-green-700",
-        },
-        {
-            title: "Pendidikan Anak Kurang Mampu",
-            date: "12 Oktober 2024 • 09:15 WIB",
-            amount: "Rp 300.000",
-            status: "Menunggu",
-            statusColor: "bg-yellow-100 text-yellow-700",
-        },
-        {
-            title: "Bantuan Pangan untuk Lansia",
-            date: "8 Oktober 2024 • 16:45 WIB",
-            amount: "Rp 250.000",
-            status: "Berhasil",
-            statusColor: "bg-green-100 text-green-700",
-        },
-        {
-            title: "Pembangunan Masjid Desa Sukamaju",
-            date: "5 Oktober 2024 • 11:20 WIB",
-            amount: "Rp 1.000.000",
-            status: "Dibatalkan",
-            statusColor: "bg-red-100 text-red-700",
-        },
-    ];
-
     const [statusFilter, setStatusFilter] = useState("Semua Status");
 
     const filteredData =
         statusFilter === "Semua Status"
-            ? history
-            : history.filter((item) => item.status === statusFilter);
+            ? donationHistory
+            : donationHistory.filter((item) => {
+                if (statusFilter === "Berhasil") return item.status === "success";
+                if (statusFilter === "Menunggu") return item.status === "pending";
+                if (statusFilter === "Dibatalkan") return item.status === "cancelled";
+            });
+
 
     return (
         <>
             <Header />
 
-            {/* LOADING VIEW (tidak mengubah urutan hooks) */}
             {loading ? (
                 <div className="p-10 text-center">Memuat data...</div>
             ) : (
@@ -179,24 +162,38 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="space-y-4">
-                                {filteredData.map((item, i) => (
+                                {donationHistory.map((item, i) => (
                                     <div
                                         key={i}
                                         className="border rounded-lg p-4 flex justify-between items-center"
                                     >
                                         <div>
-                                            <p className="font-medium">{item.title}</p>
-                                            <p className="text-xs text-gray-500">{item.date}</p>
+                                            <p className="font-medium">{item.campaign.title}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {new Date(item.created_at).toLocaleString("id-ID")}
+                                            </p>
 
                                             <div className="flex items-center gap-2 mt-1">
-                                                <p className="text-primary font-bold">{item.amount}</p>
+                                                <p className="text-primary font-bold">
+                                                    Rp {Number(item.amount).toLocaleString("id-ID")}
+                                                </p>
 
                                                 <span
-                                                    className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${item.statusColor}`}
+                                                    className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${item.status === "success"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : item.status === "pending"
+                                                            ? "bg-yellow-100 text-yellow-700"
+                                                            : "bg-red-100 text-red-700"
+                                                        }`}
                                                 >
-                                                    {item.status}
+                                                    {item.status === "success"
+                                                        ? "Berhasil"
+                                                        : item.status === "pending"
+                                                            ? "Menunggu"
+                                                            : "Dibatalkan"}
                                                 </span>
                                             </div>
+
                                         </div>
 
                                         {/* <div className="flex flex-col items-end gap-2">
