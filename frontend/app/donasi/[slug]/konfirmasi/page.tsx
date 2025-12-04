@@ -50,7 +50,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
     return `${m}:${s}`;
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (!token) return;
@@ -62,7 +62,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
       .then((data) => setUser(data));
   }, []);
 
- const donorName = isAnonymous
+  const donorName = isAnonymous
     ? "Hamba Allah"
     : (user?.name || "Donatur");
 
@@ -73,8 +73,9 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
 
   async function submitDonasi() {
     const token = localStorage.getItem("token");
-    const res = await fetch("http://127.0.0.1:8000/api/admin/donations", {
+    const res = await fetch("http://127.0.0.1:8000/api/donations", {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
@@ -96,7 +97,7 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
       alert("Gagal memproses donasi: " + data.message);
     }
   }
-  
+
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
 
@@ -136,7 +137,8 @@ export default function KonfirmasiDonasi({ params }: { params: Promise<{ slug: s
           </div>
           <div>
             <p className="text-gray-500">Nominal Donasi</p>
-            <p className="font-semibold text-primary">Rp {Number(amount || 0).toLocaleString("id-ID")}</p>
+            <p className="font-semibold text-primary">Rp {Number((amount ?? "").replace(/\D/g, "") || 0).toLocaleString("id-ID")}
+            </p>
           </div>
           <div>
             <p className="text-gray-500">Tanggal Donasi</p>

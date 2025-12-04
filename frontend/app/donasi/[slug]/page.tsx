@@ -8,6 +8,9 @@ import {
   Users,
   MapPin,
   User,
+  Lock,
+  Gift,
+  HandCoins,
 } from "lucide-react";
 import RightDonationPanel from "./rightdonationpanel";
 import Link from "next/link";
@@ -18,7 +21,7 @@ export default async function CampaignDetail({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const {slug} = await params;
+  const { slug } = await params;
 
   const res = await fetch("http://127.0.0.1:8000/api/campaigns", {
     cache: "no-store",
@@ -37,6 +40,20 @@ export default async function CampaignDetail({
   if (!campaign) {
     return <div className="text-center py-20">Campaign tidak ditemukan 😢</div>;
   }
+
+  const currentStatus = campaign.status;
+  const isCollecting =
+    currentStatus === "active" ||
+    currentStatus === "closed" ||
+    currentStatus === "distributed";
+
+  const isClosed =
+    currentStatus === "closed" ||
+    currentStatus === "distributed";
+
+  const isDistributed =
+    currentStatus === "distributed";
+
 
 
   return (
@@ -87,11 +104,11 @@ export default async function CampaignDetail({
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Lokasi</h2>
-           <div className="flex items-start gap-2">
-          <MapPin size={20} className="flex-shrink-0 mt-0.5 text-primary" />
-          <p className="text-gray-600 text-sm leading-relaxed">
-            {campaign.location}
-          </p>
+          <div className="flex items-start gap-2">
+            <MapPin size={20} className="flex-shrink-0 mt-0.5 text-primary" />
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {campaign.location}
+            </p>
           </div>
         </div>
 
@@ -128,34 +145,62 @@ export default async function CampaignDetail({
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Informasi Terbaru</h2>
 
-          <div className="flex items-center justify-between text-gray-600 text-sm">
+          <div className="flex items-center justify-between text-sm">
+
+
             <div className="flex flex-col items-center">
-              <img src="/assets/satu.png" className="h-10" />
-              <p>Donasi dikumpulkan</p>
+              <HandCoins
+                size={40}
+                className={isCollecting ? "text-purple-600" : "text-gray-400 opacity-40"}
+              />
+              <p className={isCollecting ? "font-semibold text-purple-600" : "text-gray-400"}>
+                Donasi dikumpulkan
+              </p>
             </div>
 
             <div className="flex-1 flex justify-center">
-              <div className="w-full border-t-2 border-dashed border-purple-300 mx-4" />
+              <div
+                className={`w-full border-t-2 border-dashed mx-4 ${isClosed ? "border-purple-600" : "border-purple-300"
+                  }`}
+              />
             </div>
 
             <div className="flex flex-col items-center">
-              <img src="/assets/dua.png" className="h-10" />
-              <p>Donasi ditutup</p>
+              <Lock
+                size={40}
+                className={isClosed ? "text-purple-600" : "text-gray-400 opacity-40"}
+              />
+              <p className={isClosed ? "font-semibold text-purple-600" : "text-gray-400"}>
+                Donasi ditutup
+              </p>
             </div>
 
             <div className="flex-1 flex justify-center">
-              <div className="w-full border-t-2 border-dashed border-purple-300 mx-4" />
+              <div
+                className={`w-full border-t-2 border-dashed mx-4 ${isDistributed ? "border-purple-600" : "border-purple-300"
+                  }`}
+              />
             </div>
 
             <div className="flex flex-col items-center">
-              <img src="/assets/tiga.png" className="h-10" />
-              <p>Donasi disalurkan</p>
+              <Gift
+                size={40}
+                className={isDistributed ? "text-purple-600" : "text-gray-400 opacity-40"}
+              />
+              <p className={isDistributed ? "font-semibold text-purple-600" : "text-gray-400"}>
+                Donasi disalurkan
+              </p>
             </div>
+
+
           </div>
         </div>
+
       </div>
 
-      <RightDonationPanel campaign={campaign} slug={slug} />
+      {campaign.status !== "closed" && (
+        <RightDonationPanel campaign={campaign} slug={slug} />
+      )}
     </div>
   );
 }

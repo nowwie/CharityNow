@@ -1,9 +1,22 @@
 <?php
 
+use App\Http\Controllers\AdminListDonasiController;
+use App\Http\Controllers\CreateDonasiController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\CreateCampaignController;
+use App\Http\Controllers\DeleteCampaignController;
+use App\Http\Controllers\AdminStoreDonasiController;
+use App\Http\Controllers\RiwayatDonasiController;
+use App\Http\Controllers\GetAllCampaignController;
+use App\Http\Controllers\GetCampaignController;
+use App\Http\Controllers\UpdateCampaignController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\DonasiController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UpdateProfileController;
+
 use App\Http\Controllers\CampaignController;
 use App\Models\Donasi;
 
@@ -11,25 +24,27 @@ Route::options('{any}', function () {
     return response('', 200);
 })->where('any', '.*');
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::middleware('auth:sanctum')->put('/update-profile', [AuthController::class, 'updateProfile']);
+Route::post('/login', LoginController::class);
+Route::post('/register', RegisterController::class);
+Route::middleware('auth:sanctum')->put('/update-profile', UpdateProfileController::class);
+Route::middleware('auth:sanctum')->post('/logout', LogoutController::class);
 
-Route::get('/campaigns', [CampaignController::class, 'index']);
+Route::get('/campaigns', GetAllCampaignController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
 
 
-    Route::post('/campaigns', [CampaignController::class, 'store']);
-    Route::put('/campaigns/{id}', [CampaignController::class, 'update']);
-    Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy']);
+    Route::post('/campaigns', CreateCampaignController::class);
+    Route::get('/campaigns/{id}', GetCampaignController::class);
+    Route::put('/campaigns/{id}', UpdateCampaignController::class);
+    Route::delete('/campaigns/{id}', DeleteCampaignController::class);
 
 
-    Route::post('/admin/donations', [DonasiController::class, 'adminStore']);
-    Route::get('/admin/donations', [DonasiController::class, 'index']);
+    Route::post('/admin/donations', AdminStoreDonasiController::class);
+    Route::get('/admin/donations', AdminListDonasiController::class);
 
 
-    Route::post('/donations', [DonasiController::class, 'store']);
+    Route::post('/donations', CreateDonasiController::class);
 
 
     Route::get('/me', function (Request $request) {
@@ -55,5 +70,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::middleware('auth:sanctum')->get('/my-donations', [DonasiController::class, 'myDonations']);
-
+Route::middleware('auth:sanctum')->get('/my-donations', RiwayatDonasiController::class);

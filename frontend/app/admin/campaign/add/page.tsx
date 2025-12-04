@@ -254,7 +254,7 @@ export default function AddCampaignPage() {
                     checked={status === "draft"}
                     onChange={(e) => setStatus(e.target.value)}
                   />
-                  Draft (belum dipublikasikan)
+                  Aktif (sedang berjalan)
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">
@@ -265,7 +265,7 @@ export default function AddCampaignPage() {
                     checked={status === "active"}
                     onChange={(e) => setStatus(e.target.value)}
                   />
-                  Aktif (sedang berjalan)
+                  Disalurkan
                 </label>
 
                 <label className="flex items-center gap-3 cursor-pointer">

@@ -27,7 +27,11 @@ export default function DonasiPage() {
       const res = await fetch("http://127.0.0.1:8000/api/campaigns");
       const json = await res.json();
 
-      const campaignsData = json.data ?? [];
+      const campaignsData = (json.data ?? []).filter(
+        (item: any) => item.status?.toLowerCase() !== "draft"
+      );
+
+
 
       setCampaigns(campaignsData);
       setFiltered(campaignsData);
@@ -35,19 +39,19 @@ export default function DonasiPage() {
     load();
   }, []);
 
- const handleFilter = (category: string) => {
-  if (category === "") {
-    setFiltered(campaigns);
-  } else {
-    setFiltered(
-      campaigns.filter((item) =>
-        item.category.toLowerCase() === category.toLowerCase()
-      )
-    );
-  }
+  const handleFilter = (category: string) => {
+    if (category === "") {
+      setFiltered(campaigns);
+    } else {
+      setFiltered(
+        campaigns.filter((item) =>
+          item.category.toLowerCase() === category.toLowerCase()
+        )
+      );
+    }
 
-  setCurrentPage(1); // reset pagination ke halaman 1
-};
+    setCurrentPage(1); // reset pagination ke halaman 1
+  };
 
 
   const handleSearch = (query: string) => {

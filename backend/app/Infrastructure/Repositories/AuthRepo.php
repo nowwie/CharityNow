@@ -19,7 +19,11 @@ class AuthRepo implements AuthRepoInterface
                 'password' => $userLogin->password
             ])
         ) {
-            return null;
+            return [
+                'success' => false,
+                'message' => 'Email atau password salah'
+            ];
+
         }
 
         $user = Auth::user();
@@ -39,7 +43,6 @@ class AuthRepo implements AuthRepoInterface
             'password' => Hash::make($userRegister->password),
         ]);
 
-        // Berikan token seperti login
         $token = $user->createToken("auth_token")->plainTextToken;
 
         return [

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
 use App\Application\UseCases\LoginUserUseCase;
 use App\Application\UseCases\RegisterUserUseCase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class AuthController extends Controller
+class AuthServices
 {
     protected $loginUseCase;
     protected $registerUseCase;
@@ -19,16 +20,16 @@ class AuthController extends Controller
         $this->registerUseCase = $registerUseCase;
     }
 
-    public function register(Request $request)
+    public function register(array $data)
     {
-        $result = $this->registerUseCase->execute($request->all());
-        return response()->json($result, 201);
+        $result = $this->registerUseCase->execute($data);
+        return $result;
     }
 
-    public function login(Request $request)
+    public function login(array $data)
     {
-        $data = $this->loginUseCase->execute($request->all());
-        return response()->json($data);
+        $result = $this->loginUseCase->execute($data);
+        return $result;
     }
 
     public function me(Request $request)
