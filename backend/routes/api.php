@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\DonasiController;
 use App\Http\Controllers\UpdateProfileController;
+use App\Http\Controllers\UnitTestingController;
 
 use App\Http\Controllers\CampaignController;
 use App\Models\Donasi;
@@ -71,3 +72,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->get('/my-donations', RiwayatDonasiController::class);
+
+Route::get('/unit-test-donasi', [UnitTestingController::class, 'testStoreDonasi']);
+
+Route::get('/cek-api', function () {
+    return response()->json(['api' => 'OK']);
+});
