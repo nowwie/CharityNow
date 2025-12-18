@@ -13,14 +13,19 @@ return new class extends Migration {
         Schema::create('campaigns', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('slug');
             $table->text('description');
             $table->string('category')->nullable();
             $table->bigInteger('target_amount');
             $table->bigInteger('collected_amount')->default(0);
-            $table->string('status')->default('aktif');  // aktif, selesai, pending
+            $table->string('status')->default('aktif');
             $table->string('image')->nullable();
+            $table->string('location')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
         });
+
     }
 
     /**
