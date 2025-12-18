@@ -67,6 +67,21 @@ CharityNow/
 📧 Email: novazkaam@gmail.com
 🐙 GitHub: https://github.com/nowwie
 ```
+
+**👥 Anggota Kelompok**
+```txt
+Novita Azka Maghfira
+NIM: 245150407111078
+
+Annita Puspita Suci
+NIM: 245150400111063
+
+Nanda Varesa Ramadhani
+NIM: 245150420111001
+
+Nazril Farrrel Insava
+NIM: 245150401111038
+```
 <div align="center">
 
 💚 Built with purpose. Designed for impact.
